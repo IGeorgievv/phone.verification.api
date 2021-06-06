@@ -13,7 +13,6 @@ use Cake\ORM\Entity;
  * @property int $communication_channel_id
  * @property string $communication_channel_type
  * @property int $attempts
- * @property string $device
  * @property string $session_id
  * @property \Cake\I18n\FrozenTime $created_at
  * @property \Cake\I18n\FrozenTime $updated_at

@@ -9,9 +9,9 @@ class JsonValidationException extends ValidationException
 {
     private $errors = null;
 
-    function __construct($message = "", $errors = [])
+    function __construct($message = '', $errors = [])
     {
-        parent::__construct($message, 400);
+        parent::__construct($message, 422);
 
         $this->errors = $errors;
     }

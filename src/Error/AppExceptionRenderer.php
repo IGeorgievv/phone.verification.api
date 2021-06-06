@@ -17,7 +17,7 @@ class AppExceptionRenderer extends ExceptionRenderer
     public function render(): ResponseInterface
     {
         $exception = $this->error;
-        $code = 200;
+        $code = 200; // Always 200 because otherwise the request are falling for OPTIONS, because of CORS
         // $code = $this->getHttpCode($exception);
         $method = $this->_method($exception);
         $template = $this->_template($exception, $method, $code);
@@ -78,7 +78,7 @@ class AppExceptionRenderer extends ExceptionRenderer
         if ($exception instanceof CakeException && $isDebug) {
             $this->controller->set($exception->getAttributes());
         }
-        $this->controller->setResponse($response);
+        // $this->controller->setResponse($response);
 
         return $this->_outputMessage($template);
     }

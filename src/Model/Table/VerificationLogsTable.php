@@ -5,7 +5,6 @@ namespace App\Model\Table;
 
 use Cake\ORM\Query;
 use Cake\ORM\RulesChecker;
-use Cake\ORM\Table;
 use Cake\Validation\Validator;
 
 /**
@@ -29,7 +28,7 @@ use Cake\Validation\Validator;
  * @method \App\Model\Entity\VerificationLog[]|\Cake\Datasource\ResultSetInterface|false deleteMany(iterable $entities, $options = [])
  * @method \App\Model\Entity\VerificationLog[]|\Cake\Datasource\ResultSetInterface deleteManyOrFail(iterable $entities, $options = [])
  */
-class VerificationLogsTable extends Table
+class VerificationLogsTable extends SoftDeleted
 {
     /**
      * Initialize method
@@ -41,6 +40,15 @@ class VerificationLogsTable extends Table
     {
         parent::initialize($config);
 
+        $this->addBehavior('Timestamp', [
+            'events' => [
+                'Model.beforeSave' => [
+                    'created_at' => 'new',
+                    'updated_at' => 'always',
+                ]
+            ]
+        ]);
+
         $this->setTable('verification_logs');
         $this->setDisplayField('id');
         $this->setPrimaryKey('id');
@@ -49,14 +57,15 @@ class VerificationLogsTable extends Table
             'foreignKey' => 'user_id',
             'joinType' => 'INNER',
         ]);
-        $this->belongsTo('CommunicationChannels', [
-            'foreignKey' => 'communication_channel_id',
-            'joinType' => 'INNER',
-        ]);
-        $this->belongsTo('Sessions', [
-            'foreignKey' => 'session_id',
-            'joinType' => 'INNER',
-        ]);
+        $this->belongsTo('Phones', [
+                'foreignKey' => 'communication_channel_id',
+                'joinType' => 'INNER',
+            ])
+            ->setConditions(['channel_type' => MessagesTable::COMMUNICATION_CHANNEL_PHONE]);
+        // $this->belongsTo('Sessions', [
+        //     'foreignKey' => 'session_id',
+        //     'joinType' => 'INNER',
+        // ]);
     }
 
     /**
@@ -82,26 +91,6 @@ class VerificationLogsTable extends Table
             ->requirePresence('attempts', 'create')
             ->notEmptyString('attempts');
 
-        $validator
-            ->scalar('device')
-            ->maxLength('device', 255)
-            ->requirePresence('device', 'create')
-            ->notEmptyString('device');
-
-        $validator
-            ->dateTime('created_at')
-            ->requirePresence('created_at', 'create')
-            ->notEmptyDateTime('created_at');
-
-        $validator
-            ->dateTime('updated_at')
-            ->requirePresence('updated_at', 'create')
-            ->notEmptyDateTime('updated_at');
-
-        $validator
-            ->dateTime('deleted_at')
-            ->allowEmptyDateTime('deleted_at');
-
         return $validator;
     }
 
@@ -115,8 +104,8 @@ class VerificationLogsTable extends Table
     public function buildRules(RulesChecker $rules): RulesChecker
     {
         $rules->add($rules->existsIn(['user_id'], 'Users'), ['errorField' => 'user_id']);
-        $rules->add($rules->existsIn(['communication_channel_id'], 'CommunicationChannels'), ['errorField' => 'communication_channel_id']);
-        $rules->add($rules->existsIn(['session_id'], 'Sessions'), ['errorField' => 'session_id']);
+        // $rules->add($rules->existsIn(['communication_channel_id'], 'CommunicationChannels'), ['errorField' => 'communication_channel_id']);
+        // $rules->add($rules->existsIn(['session_id'], 'Sessions'), ['errorField' => 'session_id']);
 
         return $rules;
     }

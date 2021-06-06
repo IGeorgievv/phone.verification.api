@@ -37,6 +37,15 @@ class CountriesTable extends Table
     {
         parent::initialize($config);
 
+        $this->addBehavior('Timestamp', [
+            'events' => [
+                'Model.beforeSave' => [
+                    'created_at' => 'new',
+                    'updated_at' => 'always',
+                ]
+            ]
+        ]);
+
         $this->setTable('countries');
         $this->setDisplayField('name');
         $this->setPrimaryKey('id');

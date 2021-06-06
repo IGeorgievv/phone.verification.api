@@ -50,7 +50,7 @@ $routes->scope('/', function (RouteBuilder $builder) {
      * its action called 'display', and we pass a param to select the view file
      * to use (in this case, templates/Pages/home.php)...
      */
-    $builder->connect('/', ['controller' => 'Pages', 'action' => 'display', 'home']);
+    // $builder->connect('/', ['controller' => 'Pages', 'action' => 'display', 'home']);
 
     /*
      * ...and connect the rest of 'Pages' controller's URLs.
@@ -80,26 +80,18 @@ $routes->scope('/', function (RouteBuilder $builder) {
  * ```
  * $routes->scope('/api', function (RouteBuilder $builder) {
  *     // No $builder->applyMiddleware() here.
- *     
+ *
  *     // Parse specified extensions from URLs
  *     // $builder->setExtensions(['json', 'xml']);
- *     
+ *
  *     // Connect API actions here.
  * });
  * ```
  */
 $routes->scope('/api', function (RouteBuilder $builder) {
+    $builder->post('/login', ['controller' => 'Users', 'action' => 'login',]);
+    $builder->connect('/unauthorized', ['controller' => 'Users', 'action' => 'unauthorized',]);
     $builder->post('/users', ['controller' => 'Users', 'action' => 'create',]);
-    // $builder->connect('/users', 
-    //     [
-    //         // 'prefix' => 'api',
-    //         'api' => true,
-    //         // 'controller' => 'categories',
-    //         'ext' => 'json',
-    //         'action' => 'create',
-    //         '[method]' => 'POST',
-    //     ]
-    // );
     $builder->get(
         '/users/:user_id',
         [
@@ -110,6 +102,13 @@ $routes->scope('/api', function (RouteBuilder $builder) {
     $builder->put('/users/:user_id', ['controller' => 'Users', 'action' => 'update',]);
     $builder->get('/users', ['controller' => 'Users', 'action' => 'index',]);
     $builder->delete('/users/:user_id', ['controller' => 'Users', 'action' => 'destroy',]);
+
+    $builder->patch('/users/channels/:channel_type/verification', [
+        'controller' => 'CommunicationChannels', 'action' => 'verification',
+    ]);
+    $builder->get('/users/channels/:channel_type', [
+        'controller' => 'CommunicationChannels', 'action' => 'index',
+    ]);
 
     $builder->get('/countries', ['controller' => 'Countries', 'action' => 'index',]);
     $builder->get('/countries/:iso_code', ['controller' => 'Countries', 'action' => 'show',]);

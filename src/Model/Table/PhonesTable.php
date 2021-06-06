@@ -5,7 +5,6 @@ namespace App\Model\Table;
 
 use Cake\ORM\Query;
 use Cake\ORM\RulesChecker;
-use Cake\ORM\Table;
 use Cake\Validation\Validator;
 
 /**
@@ -27,7 +26,7 @@ use Cake\Validation\Validator;
  * @method \App\Model\Entity\Phone[]|\Cake\Datasource\ResultSetInterface|false deleteMany(iterable $entities, $options = [])
  * @method \App\Model\Entity\Phone[]|\Cake\Datasource\ResultSetInterface deleteManyOrFail(iterable $entities, $options = [])
  */
-class PhonesTable extends Table
+class PhonesTable extends SoftDeleted
 {
     /**
      * Initialize method
@@ -38,6 +37,15 @@ class PhonesTable extends Table
     public function initialize(array $config): void
     {
         parent::initialize($config);
+
+        $this->addBehavior('Timestamp', [
+            'events' => [
+                'Model.beforeSave' => [
+                    'created_at' => 'new',
+                    'updated_at' => 'always',
+                ]
+            ]
+        ]);
 
         $this->setTable('phones');
         $this->setDisplayField('id');
@@ -62,50 +70,36 @@ class PhonesTable extends Table
             ->allowEmptyString('id', null, 'create');
 
         $validator
-            ->scalar('phone_code')
-            ->maxLength('phone_code', 255)
-            ->requirePresence('phone_code', 'create')
-            ->notEmptyString('phone_code');
+            ->scalar('country_code')
+            ->maxLength('country_code', 255)
+            ->requirePresence('country_code', 'create')
+            ->notEmptyString('country_code');
 
         $validator
-            ->scalar('phone_number')
-            ->maxLength('phone_number', 255)
-            ->requirePresence('phone_number', 'create')
-            ->notEmptyString('phone_number');
+            ->scalar('number')
+            ->maxLength('number', 255)
+            ->requirePresence('number', 'create')
+            ->notEmptyString('number');
 
         $validator
-            ->scalar('full_phone')
-            ->maxLength('full_phone', 255)
-            ->requirePresence('full_phone', 'create')
-            ->notEmptyString('full_phone');
+            ->scalar('formatted')
+            ->maxLength('formatted', 255)
+            ->requirePresence('formatted', 'create')
+            ->notEmptyString('formatted');
 
         $validator
-            ->boolean('is_phone_verified')
-            ->notEmptyString('is_phone_verified');
+            ->boolean('is_verified')
+            ->notEmptyString('is_verified');
 
         $validator
-            ->scalar('phone_verification_code')
-            ->maxLength('phone_verification_code', 255)
-            ->requirePresence('phone_verification_code', 'create')
-            ->notEmptyString('phone_verification_code');
+            ->scalar('verification_code')
+            ->maxLength('verification_code', 255)
+            ->requirePresence('verification_code', 'create')
+            ->notEmptyString('verification_code');
 
         $validator
             ->boolean('is_default')
             ->notEmptyString('is_default');
-
-        $validator
-            ->dateTime('created_at')
-            ->requirePresence('created_at', 'create')
-            ->notEmptyDateTime('created_at');
-
-        $validator
-            ->dateTime('updated_at')
-            ->requirePresence('updated_at', 'create')
-            ->notEmptyDateTime('updated_at');
-
-        $validator
-            ->dateTime('deleted_at')
-            ->allowEmptyDateTime('deleted_at');
 
         return $validator;
     }

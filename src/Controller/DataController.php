@@ -17,29 +17,46 @@ declare(strict_types=1);
 namespace App\Controller;
 
 use App\Error\JsonValidationException;
+use Authentication\Controller\Component\AuthenticationComponent;
 use Cake\Core\Configure;
+use Cake\Database\Exception\DatabaseException;
 use Cake\Http\Exception\ForbiddenException;
 use Cake\Http\Exception\NotFoundException;
 use Cake\Http\Response;
 use Cake\View\Exception\MissingTemplateException;
 use Exception;
+use Firebase\JWT\JWT;
 
 class DataController extends AppController
 {
-    public function service($serviceName, $methodName): void
+    public function service($serviceName, $methodName, $validationErrors = []): void
     {
-        $autorization = null;
+        $autorization = [
+            // 'token' => $this->Authentication->getIdentity()->__debugInfo(),
+            'user' => $this->Authentication->getIdentity()->getOriginalData(),
+        ];
 
         $response = [
             'code' => 200,
             'data' => null,
+            'message' => 'Operation is completed.',
             'autorization' => $autorization,
         ];
 
         try {
+            if (count($validationErrors) >= 1) {
+                throw new JsonValidationException(
+                    'There is invalid data.',
+                    $validationErrors
+                );
+            }
+
             $fullServiceName = 'App\Services\\'. $serviceName;
-            $service = new $fullServiceName();
-            $autorization = null;
+            $service = new $fullServiceName(
+                $this->request,
+                $this->Authentication,
+                $autorization
+            );
 
             $response['data'] = $service->$methodName(
                 array_merge($this->_getCleanParams(), $this->request->getData())
@@ -51,6 +68,17 @@ class DataController extends AppController
                 /* @var JsonValidationException **/
                 $response['data'] = $exception->getErrors();
             }
+
+            if (!is_numeric($exception->getCode())) {
+                $response['code'] = 500;
+                $response['message'] = 'Internal error!';
+            }
+
+            if (isset($service) && isset($service::$models)) {
+                foreach ($service::$models as $model) {
+                    $model['handler']->delete($model['entity']);
+                }
+            }
         }
 
         $this->set($response);
@@ -58,10 +86,10 @@ class DataController extends AppController
         $this->RequestHandler->renderAs($this, 'json');
     }
 
-    private function _getCleanParams(): array
+    protected function _getCleanParams(): array
     {
         $params = $this->request->getAttribute('params');
-        
+
         unset($params['pass']);
         unset($params['controller']);
         unset($params['action']);

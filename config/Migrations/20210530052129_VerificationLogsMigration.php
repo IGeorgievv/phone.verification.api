@@ -32,10 +32,6 @@ class VerificationLogsMigration extends AbstractMigration
             'null' => false,
         ]);
         $table->addColumn('attempts', 'integer');
-        $table->addColumn('device', 'string', [
-            'default' => null,
-            'null' => false,
-        ]);
         $table->addColumn('session_id', 'string', [
             'default' => null,
             'null' => false,

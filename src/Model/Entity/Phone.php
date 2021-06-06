@@ -10,11 +10,11 @@ use Cake\ORM\Entity;
  *
  * @property int $id
  * @property int $user_id
- * @property string $phone_code
- * @property string $phone_number
- * @property string $full_phone
- * @property bool $is_phone_verified
- * @property string $phone_verification_code
+ * @property string $country_code
+ * @property string $number
+ * @property string $formatted
+ * @property bool $is_verified
+ * @property string $verification_code
  * @property bool $is_default
  * @property \Cake\I18n\FrozenTime $created_at
  * @property \Cake\I18n\FrozenTime $updated_at
@@ -35,15 +35,16 @@ class Phone extends Entity
      */
     protected $_accessible = [
         'user_id' => true,
-        'phone_code' => true,
-        'phone_number' => true,
-        'full_phone' => true,
-        'is_phone_verified' => true,
-        'phone_verification_code' => true,
+        'country_code' => true,
+        'number' => true,
+        'formatted' => true,
+        'is_verified' => true,
+        'verification_code' => true,
         'is_default' => true,
         'created_at' => true,
         'updated_at' => true,
         'deleted_at' => true,
         'user' => true,
     ];
+    protected $_hidden = ['verification_code', 'deleted_at'];
 }

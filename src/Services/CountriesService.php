@@ -5,7 +5,7 @@ namespace App\Services;
 
 use App\Model\Table\CountriesTable;
 
-class CountriesService
+class CountriesService extends BaseService
 {
     public function show(array $params): array
     {

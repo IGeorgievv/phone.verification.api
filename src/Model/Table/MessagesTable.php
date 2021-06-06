@@ -5,7 +5,6 @@ namespace App\Model\Table;
 
 use Cake\ORM\Query;
 use Cake\ORM\RulesChecker;
-use Cake\ORM\Table;
 use Cake\Validation\Validator;
 
 /**
@@ -27,8 +26,10 @@ use Cake\Validation\Validator;
  * @method \App\Model\Entity\Message[]|\Cake\Datasource\ResultSetInterface|false deleteMany(iterable $entities, $options = [])
  * @method \App\Model\Entity\Message[]|\Cake\Datasource\ResultSetInterface deleteManyOrFail(iterable $entities, $options = [])
  */
-class MessagesTable extends Table
+class MessagesTable extends SoftDeleted
 {
+    const COMMUNICATION_CHANNEL_PHONE = 'phone';
+    const COMMUNICATION_CHANNEL_EMAIL = 'email';
     /**
      * Initialize method
      *
@@ -38,6 +39,15 @@ class MessagesTable extends Table
     public function initialize(array $config): void
     {
         parent::initialize($config);
+
+        $this->addBehavior('Timestamp', [
+            'events' => [
+                'Model.beforeSave' => [
+                    'created_at' => 'new',
+                    'updated_at' => 'always',
+                ]
+            ]
+        ]);
 
         $this->setTable('messages');
         $this->setDisplayField('id');
@@ -62,10 +72,16 @@ class MessagesTable extends Table
             ->allowEmptyString('id', null, 'create');
 
         $validator
+            ->nonNegativeInteger('user_id')
+            ->allowEmptyString('user_id', null, 'create')
+            ->requirePresence('user_id', 'create');
+
+        $validator
             ->scalar('subject')
             ->maxLength('subject', 255)
-            ->requirePresence('subject', 'create')
-            ->notEmptyString('subject');
+            ->allowEmptyString('subject', null);
+            // ->requirePresence('subject', 'create')
+            // ->notEmptyString('subject');
 
         $validator
             ->scalar('content')
@@ -84,20 +100,6 @@ class MessagesTable extends Table
             ->maxLength('address', 255)
             ->requirePresence('address', 'create')
             ->notEmptyString('address');
-
-        $validator
-            ->dateTime('created_at')
-            ->requirePresence('created_at', 'create')
-            ->notEmptyDateTime('created_at');
-
-        $validator
-            ->dateTime('updated_at')
-            ->requirePresence('updated_at', 'create')
-            ->notEmptyDateTime('updated_at');
-
-        $validator
-            ->dateTime('deleted_at')
-            ->allowEmptyDateTime('deleted_at');
 
         return $validator;
     }

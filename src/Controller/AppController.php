@@ -50,20 +50,24 @@ class AppController extends Controller
          * see https://book.cakephp.org/4/en/controllers/components/form-protection.html
          */
         //$this->loadComponent('FormProtection');
+        // Add this line to check authentication result and lock your site
+        $this->loadComponent('Authentication.Authentication');
     }
-    
+
     public function beforeRender(EventInterface $event) {
         $this->setCorsHeaders();
     }
-    
+
     public function beforeFilter(EventInterface $event) {
         // $this->getEventManager()->off($this->Csrf);
         if ($this->request->is('options')) {
             $this->setCorsHeaders();
             return $this->response;
         }
+
+        $this->Authentication->addUnauthenticatedActions(['index', 'show']);
     }
-    
+
     private function setCorsHeaders() {
         $this->response = $this->response->cors($this->request)
             // ->allowOrigin(['*'])

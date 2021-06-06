@@ -5,7 +5,6 @@ namespace App\Model\Table;
 
 use Cake\ORM\Query;
 use Cake\ORM\RulesChecker;
-use Cake\ORM\Table;
 use Cake\Validation\Validator;
 
 /**
@@ -29,7 +28,7 @@ use Cake\Validation\Validator;
  * @method \App\Model\Entity\User[]|\Cake\Datasource\ResultSetInterface|false deleteMany(iterable $entities, $options = [])
  * @method \App\Model\Entity\User[]|\Cake\Datasource\ResultSetInterface deleteManyOrFail(iterable $entities, $options = [])
  */
-class UsersTable extends Table
+class UsersTable extends SoftDeleted
 {
     /**
      * Initialize method
@@ -40,6 +39,15 @@ class UsersTable extends Table
     public function initialize(array $config): void
     {
         parent::initialize($config);
+
+        $this->addBehavior('Timestamp', [
+            'events' => [
+                'Model.beforeSave' => [
+                    'created_at' => 'new',
+                    'updated_at' => 'always',
+                ]
+            ]
+        ]);
 
         $this->setTable('users');
         $this->setDisplayField('id');
@@ -76,7 +84,7 @@ class UsersTable extends Table
 
         $validator
             ->email('email')
-            ->maxLength('type', 255)
+            ->maxLength('email', 255)
             ->requirePresence('email', 'create')
             ->notEmptyString('email');
 
@@ -86,20 +94,6 @@ class UsersTable extends Table
             ->minLength('password', 8)
             ->requirePresence('password', 'create')
             ->notEmptyString('password');
-
-        $validator
-            ->dateTime('created_at')
-            ->requirePresence('created_at', 'create')
-            ->notEmptyDateTime('created_at');
-
-        $validator
-            ->dateTime('updated_at')
-            ->requirePresence('updated_at', 'create')
-            ->notEmptyDateTime('updated_at');
-
-        $validator
-            ->dateTime('deleted_at')
-            ->allowEmptyDateTime('deleted_at');
 
         return $validator;
     }

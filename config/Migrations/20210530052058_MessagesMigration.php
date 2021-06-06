@@ -19,7 +19,7 @@ class MessagesMigration extends AbstractMigration
         $table->addColumn('subject', 'string', [
             'default' => null,
             'limit' => 255,
-            'null' => false,
+            'null' => true,
         ]);
         $table->addColumn('content', 'text', [
             'default' => null,
